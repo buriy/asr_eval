@@ -1,0 +1,20 @@
+# pycharm, feel free to add your IDE specific folders
+.idea/
+.vscode/
+
+# generic python
+__pycache__/
+*.py[cod]
+
+#ipynb
+.ipynb_checkpoints/
+.venv/
+
+# project specific
+*.csv
+*.gz
+
+poetry.lock
+
+/data/results
+/conf/
