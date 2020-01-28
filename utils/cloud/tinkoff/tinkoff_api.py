@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+import json
+
 from utils.cloud.tinkoff.audio import audio_open_read
 from utils.cloud.tinkoff.auth import authorization_metadata
 from utils.cloud.tinkoff.cloud.stt.v1 import stt_pb2
@@ -10,7 +12,7 @@ from utils.cloud.tinkoff.common import build_recognition_request, make_channel, 
 class TinkoffClient:
 
     def __init__(self, credentials='conf/google_api_credentials.json'):
-        self.credentials = credentials
+        self.credentials = json.load(open(credentials, 'rb'))
         self.api_key = self.credentials['api_key']
         self.secret_key = self.credentials['secret_key']
         # FIXME: set other attributes needed at submit()
