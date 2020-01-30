@@ -25,21 +25,16 @@ logger.addHandler(speech_log)
 
 class CrtClient:
 
-    def __init__(self,
-                 credentials='conf/crt_api_credentials.json',
-                 suffix_service=".crt.txt"):
+    def __init__(self, credentials='conf/crt_api_credentials.json'):
         self.credentials = json.load(open(credentials, 'rb'))
         self.recognize_api = RecognizeApi()
         self.credentials = StartSessionRequest(self.credentials['username'],
                                                self.credentials['password'],
                                                self.credentials['domain_id'])
-        self.suffix = suffix_service
 
     def submit(self, file_name):
         # Loads the audio into memory
         assert os.path.exists(file_name)
-        if not self.is_need_again(file_name):    # this file was recognized early and saved result
-            return
         with open(file_name, "rb") as in_file:
             data = in_file.read()
         encoded_string = base64.standard_b64encode(data)
@@ -49,44 +44,45 @@ class CrtClient:
             recognition_request = RecognitionRequestDto(audio_file, "CommonRus")
             self.sessionless_recognition_request = SessionlessRecognitionRequestDto(self.credentials, recognition_request)
             self.recognition_result = self.recognize_api.recognize_sessionless(self.sessionless_recognition_request)
-            self.record_result_recognize(file_name, ['OK', self.recognition_result.text])
+            return ['OK', self.recognition_result.text]
         except Exception:
-            self.record_result_recognize(file_name, ['error', ''])
             print("Didn't work for:", file_name)
             import traceback;
             traceback.print_exc()
-            return ''
+            return ['error', '']
 
-    def record_result_recognize(self, name_file, result):
-        """ save results  """
-        res_name = Path(name_file).with_suffix(self.suffix)
-        with io.open(res_name, 'w') as f:
-            if result[0] == 'error':
-                f.close()
-            elif result[0] == 'OK' and not len(result[1]):
-                f.write('-')
-            else:
-                f.write(result[1])
 
-    def is_need_again(self, file_name):
-        """" check file for need recognition """
-        nf = Path(file_name).with_suffix(self.suffix)
-        if nf.is_file() and nf.stat().st_size > 0:
-            return False
+def record_result_recognize(result, res_name):
+    """ save results  """
+    with io.open(res_name, 'w') as f:
+        if result[0] == 'error':
+            f.close()
+        elif result[0] == 'OK' and not len(result[1]):
+            f.write('-')
         else:
-            return True
+            f.write(result[1])
 
-    def work_with_dataset(self, dir_dataset):
-        """ working with files """
-        assert os.path.exists(dir_dataset)
-        wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
-        for file in wav_files:
-            if not self.is_need_again(file):
-                continue
-            self.submit(file)
+
+def is_need_again(file_name):
+    """" check file for need recognition """
+    if file_name.is_file() and file_name.stat().st_size > 0:
+        return False
+    else:
+        return True
+
+
+def work_with_dataset(dir_dataset, suffix):
+    """ working with files """
+    assert os.path.exists(dir_dataset)
+    wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
+    for file in wav_files:
+        if not is_need_again(Path(file).with_suffix(suffix)):
+            continue
+        result = client.submit(file)
+        record_result_recognize(result, Path(file).with_suffix(suffix))
 
 
 if __name__ == '__main__':
-    client = CrtClient(suffix_service=".crt.txt")
-    print(client.submit('data/examples/example_16000.wav'))           # it raw for test
-    #client.work_with_dataset('/data/files')                           # select this for working with dataset
+    client = CrtClient(credentials='conf/crt_api_credentials.json')
+    print(client.submit('data/examples/example_16000.wav')[1])           # it raw for test
+    #work_with_dataset('data/test_wav_files', '.crt.txt')                        # select this for working with dataset
