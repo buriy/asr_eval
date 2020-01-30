@@ -27,6 +27,6 @@ def create_test_dataset():
 
 
 if __name__ == '__main__':
-    new_dir = Path(place_dir_data()).joinpath(PurePosixPath(target_directory).stem)
+    new_dir = Path(place_dir_data()).joinpath(PurePosixPath(target_directory))
     new_dir.mkdir(parents=True, exist_ok=True)
     create_test_dataset()
