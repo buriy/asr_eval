@@ -5,7 +5,7 @@ from shutil import copyfile
 
 SOURCE_DIR = sys.argv[1]
 TARGET_DIR = '../data/files/'
-MAX_FILES = 10
+MAX_FILES = 100
 
 
 def mp3_to_wav(file, new_dir):
