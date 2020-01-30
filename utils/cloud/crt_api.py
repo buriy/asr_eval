@@ -28,7 +28,7 @@ class CrtClient:
     def __init__(self,
                  credentials='conf/crt_api_credentials.json',
                  suffix_service=".crt.txt",
-                 dir_dataset='../data/files'):
+                 dir_dataset='/data/files'):
         self.credentials = json.load(open(credentials, 'rb'))
         self.recognize_api = RecognizeApi()
         self.credentials = StartSessionRequest(self.credentials['username'],
@@ -89,5 +89,5 @@ class CrtClient:
 
 if __name__ == '__main__':
     client = CrtClient(suffix_service=".crt.txt", dir_dataset='/data/files')
-    print(client.submit('data/examples/example_16000.wav'))      # it raw for test
-    #work_with_dataset()                                                      # select this for working with dataset
+    print(client.submit('data/examples/example_16000.wav'))           # it raw for test
+    #work_with_dataset()                                              # select this for working with dataset
