@@ -27,15 +27,13 @@ class CrtClient:
 
     def __init__(self,
                  credentials='conf/crt_api_credentials.json',
-                 suffix_service=".crt.txt",
-                 dir_dataset='/data/files'):
+                 suffix_service=".crt.txt"):
         self.credentials = json.load(open(credentials, 'rb'))
         self.recognize_api = RecognizeApi()
         self.credentials = StartSessionRequest(self.credentials['username'],
                                                self.credentials['password'],
                                                self.credentials['domain_id'])
         self.suffix = suffix_service
-        self.dir_dataset = dir_dataset
 
     def submit(self, file_name):
         # Loads the audio into memory
@@ -78,9 +76,10 @@ class CrtClient:
         else:
             return True
 
-    def work_with_dataset(self):
+    def work_with_dataset(self, dir_dataset):
         """ working with files """
-        wav_files = sorted(Path(self.dir_dataset).rglob('*.wav'))
+        assert os.path.exists(dir_dataset)
+        wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
         for file in wav_files:
             if not self.is_need_again(file):
                 continue
@@ -88,6 +87,6 @@ class CrtClient:
 
 
 if __name__ == '__main__':
-    client = CrtClient(suffix_service=".crt.txt", dir_dataset='/data/files')
+    client = CrtClient(suffix_service=".crt.txt")
     print(client.submit('data/examples/example_16000.wav'))           # it raw for test
-    #work_with_dataset()                                              # select this for working with dataset
+    #client.work_with_dataset('/data/files')                           # select this for working with dataset
