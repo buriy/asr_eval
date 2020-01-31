@@ -26,13 +26,31 @@ def create_client(name_api):
     return client
 
 
-def work_with_dataset(name_api, dir_dataset, suffix):
+def get_suffix(name_api):
+    name_api = name_api.lower()
+    if name_api == 'crt':
+        suffix = '.crt.txt'
+    elif name_api == 'google':
+        suffix = '.google.txt'
+    elif name_api == 'wit':
+        suffix = '.wit.txt'
+    elif name_api == 'tinkoff':
+        suffix = '.tinkoff.txt'
+    elif name_api == 'yandex':
+        suffix = '.yandex.txt'
+    else:
+        suffix = False
+    return suffix
+
+
+def work_with_dataset(name_api, dir_dataset):
     """ working with files in mode one process """
     assert os.path.exists(dir_dataset)
     client = create_client(name_api)
     if not client:
         print("Error name api")
         return
+    suffix = get_suffix(name_api)
     wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
     for file in wav_files:
         if not is_need_again(Path(file).with_suffix(suffix)):
@@ -66,16 +84,21 @@ def work_for_each(args):
     record_result_recognize(result, Path(file).with_suffix(suffix))
 
 
-def work_with_dataset_multi(name_api, dir_dataset, suffix):
+def work_with_dataset_multi(name_api, dir_dataset):
     """ working with files in mode multiprocessing"""
     assert os.path.exists(dir_dataset)
     client = create_client(name_api)                 # check is exists client for  name_api
     if not client:
         print("Error name api")
         return
+    suffix = get_suffix(name_api)
     wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
     pool = Pool()
     results = pool.map(work_for_each, [(name_api, file, suffix)
                                        for file in wav_files if is_need_again(Path(file).with_suffix(suffix))])
     pool.close()
     pool.join()
+
+
+if __name__ == '__main__':
+    work_with_dataset_multi('CRT', 'data/test_wav_files')
