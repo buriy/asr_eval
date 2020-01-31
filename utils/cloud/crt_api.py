@@ -45,5 +45,6 @@ class CrtClient:
 if __name__ == '__main__':
     client = CrtClient(credentials='conf/crt_api_credentials.json')
     print(client.submit('data/examples/example_16000.wav')[1])           # it raw for test
-    #from bin.handle_dataset import work_with_dataset
+    #from bin.handle_dataset import work_with_dataset, work_with_dataset_multi
     #work_with_dataset(client, 'data/test_wav_files', '.crt.txt')        # select this for working with dataset
+    #work_with_dataset_multi('data/test_wav_files', '.crt.txt')          # select this for working in multiprocessing mode

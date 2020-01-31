@@ -1,6 +1,8 @@
 import os
 import io
 from pathlib import Path
+from multiprocessing import Pool
+from utils.cloud.crt_api import CrtClient
 
 
 def work_with_dataset(client, dir_dataset, suffix):
@@ -31,3 +33,19 @@ def is_need_again(file_name):
         return True
 
 
+def work_for_each(args):
+    file, suffix = args
+    client = CrtClient(credentials='conf/crt_api_credentials.json')
+    result = client.submit(file)
+    record_result_recognize(result, Path(file).with_suffix(suffix))
+
+
+def work_with_dataset_multi(dir_dataset, suffix):
+    """ working with files """
+    assert os.path.exists(dir_dataset)
+    wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
+    pool = Pool()
+    results = pool.map(work_for_each, [(file, suffix)
+                                       for file in wav_files if is_need_again(Path(file).with_suffix(suffix))])
+    pool.close()
+    pool.join()
