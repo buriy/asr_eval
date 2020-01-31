@@ -34,10 +34,7 @@ class CrtClient:
             recognition_request = RecognitionRequestDto(audio_file, "CommonRus")
             self.sessionless_recognition_request = SessionlessRecognitionRequestDto(self.credentials, recognition_request)
             self.recognition_result = self.recognize_api.recognize_sessionless(self.sessionless_recognition_request)
-            if len(self.recognition_result.text):
-                return self.recognition_result.text
-            else:
-                return '-'
+            return self.recognition_result.text or '-'
         except Exception:
             print("Didn't work for:", file_name)
             import traceback;
