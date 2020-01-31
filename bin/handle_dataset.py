@@ -17,12 +17,10 @@ def work_with_dataset(client, dir_dataset, suffix):
 def record_result_recognize(result, res_name):
     """ save results  """
     with io.open(res_name, 'w') as f:
-        if result[0] == 'error':
+        if not len(result):
             f.close()
-        elif result[0] == 'OK' and not len(result[1]):
-            f.write('-')
         else:
-            f.write(result[1])
+            f.write(result)
 
 
 def is_need_again(file_name):
