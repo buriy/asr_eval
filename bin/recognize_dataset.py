@@ -28,19 +28,7 @@ def create_client(name_api):
 
 def get_suffix(name_api):
     name_api = name_api.lower()
-    if name_api == 'crt':
-        suffix = '.crt.txt'
-    elif name_api == 'google':
-        suffix = '.google.txt'
-    elif name_api == 'wit':
-        suffix = '.wit.txt'
-    elif name_api == 'tinkoff':
-        suffix = '.tinkoff.txt'
-    elif name_api == 'yandex':
-        suffix = '.yandex.txt'
-    else:
-        suffix = False
-    return suffix
+    return '.' + name_api + '.txt'
 
 
 def work_with_dataset(name_api, dir_dataset):
