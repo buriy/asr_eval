@@ -4,6 +4,7 @@ import struct
 import wave
 
 from utils.cloud.tinkoff.cloud.stt.v1 import stt_pb2
+from utils.cloud.tinkoff.cloud.tts.v1 import tts_pb2
 
 
 def _encoding_to_pyaudio_format_and_width(encoding):

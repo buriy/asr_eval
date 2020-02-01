@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import os
 import json
 
 from utils.cloud.tinkoff.audio import audio_open_read
@@ -11,13 +12,13 @@ from utils.cloud.tinkoff.common import build_recognition_request, make_channel, 
 
 class TinkoffClient:
 
-    def __init__(self, credentials='conf/google_api_credentials.json'):
-        self.credentials = json.load(open(credentials, 'rb'))
-        self.api_key = self.credentials['api_key']
-        self.secret_key = self.credentials['secret_key']
+    def __init__(self, credentials='conf/tinkoff_api_credentials.json'):
+        self.credentials = json.load(open('../../../'+credentials, 'rb'))
+        os.environ['VOICEKIT_SECRET_KEY'] = self.credentials['secret_key']
+        os.environ['VOICEKIT_API_KEY'] = self.credentials['api_key']
         # FIXME: set other attributes needed at submit()
         # FIXME: they are set up at BaseRecognitionParser
-        self.encoding = stt_pb2.LINEAR16
+        # self.encoding = stt_pb2.LINEAR16
         # encoding = ProtobufEnumChoices(stt_pb2.AudioEncoding,
         #                                ["MPEG_AUDIO", "LINEAR16", "ALAW", "MULAW", "RAW_OPUS"])
         # self.add_argument("-r", "--rate", type=int, required=True, help="Audio sampling rate.")
@@ -51,17 +52,26 @@ class TinkoffClient:
         # config.enable_automatic_punctuation = not args.disable_automatic_punctuation
 
     def submit(self, file_name):
-        args = self
+        file_name = '../../../' + file_name
+        ars = ['-r', '16000', '-c', '1', '-e', 'LINEAR16', file_name]
+        args = BaseRecognitionParser().parse_args(ars)
         if args.encoding == stt_pb2.RAW_OPUS:
             raise ValueError("RAW_OPUS encoding is not supported by this script")
         with audio_open_read(file_name, args.encoding, args.rate, args.num_channels, args.chunk_size,
                              args.pyaudio_max_seconds) as reader:
-            stub = stt_pb2_grpc.SpeechToTextStub(make_channel(args))
-            metadata = authorization_metadata(args.api_key, args.secret_key, "tinkoff.cloud.stt")
-            response = stub.Recognize(build_recognition_request(args, reader), metadata=metadata)
-            print_recognition_response(response)
+            try:
+                stub = stt_pb2_grpc.SpeechToTextStub(make_channel(args))
+                metadata = authorization_metadata(args.api_key, args.secret_key, "tinkoff.cloud.stt")
+                response = stub.Recognize(build_recognition_request(args, reader), metadata=metadata)
+                return print_recognition_response(response) or '-'
+            except Exception:
+                print("Didn't work for:", file_name)
+                import traceback;
+                traceback.print_exc()
+                return ''
 
 
 if __name__ == "__main__":
-    client = TinkoffClient(credentials='conf/tinkoff_api_credentials.json')
+    client = TinkoffClient() #credentials='conf/tinkoff_api_credentials.json')
     print(client.submit('data/examples/example_16000.wav'))
+
