@@ -1,23 +1,29 @@
 import os
 import io
+import sys
 from pathlib import Path
 from multiprocessing import Pool
+
+
+def find_dataset(dir):
+    p = Path('..')
+    return list(p.glob(dir))[0].resolve()
 
 
 def create_client(name_api):
     name_api = name_api.lower()
     if name_api == 'crt':
         from utils.cloud.crt_api import CrtClient
-        client = CrtClient(credentials='conf/crt_api_credentials.json')
-    elif name_api == 'google':
-        from utils.cloud.google_api import GoogleClient
-        client = GoogleClient(credentials='conf/google_api_credentials.json')
-    elif name_api == 'wit':
-        from utils.cloud.wit_ai import WitClient
-        client = WitClient(WIT_SECRET='HOUUWVT2MFFIF5NRN5V2XP7UL4EKIXCU')
+        client = CrtClient()
     elif name_api == 'tinkoff':
         from utils.cloud.tinkoff.tinkoff_api import TinkoffClient
         client = TinkoffClient()
+    elif name_api == 'google':
+        from utils.cloud.google_api import GoogleClient
+        client = GoogleClient()
+    elif name_api == 'wit':
+        from utils.cloud.wit_ai import WitClient
+        client = WitClient()
     elif name_api == 'yandex':
         from utils.cloud.yandex_short import YandexClient
         client = YandexClient()
@@ -74,13 +80,14 @@ def work_for_each(args):
 
 def work_with_dataset_multi(name_api, dir_dataset):
     """ working with files in mode multiprocessing"""
-    assert os.path.exists(dir_dataset)
+    abs_dir_dataset = find_dataset(dir_dataset)
+    assert os.path.exists(abs_dir_dataset)
     client = create_client(name_api)                 # check is exists client for  name_api
     if not client:
         print("Error name api")
         return
     suffix = get_suffix(name_api)
-    wav_files = sorted(Path(dir_dataset).rglob('*.wav'))
+    wav_files = sorted(Path(abs_dir_dataset).rglob('*.wav'))
     pool = Pool()
     results = pool.map(work_for_each, [(name_api, file, suffix)
                                        for file in wav_files if is_need_again(Path(file).with_suffix(suffix))])
@@ -89,4 +96,12 @@ def work_with_dataset_multi(name_api, dir_dataset):
 
 
 if __name__ == '__main__':
-    work_with_dataset_multi('CRT', 'data/test_wav_files')
+    args = sys.argv[1:]
+    if not len(args):
+        work_with_dataset_multi('CRT', 'data/test_wav_files')
+    elif len(args) == 2:
+        work_with_dataset_multi(args[0], args[1])
+    else:
+        print('Please run program with two arguments: name_api and directory - place locate of dataset')
+
+

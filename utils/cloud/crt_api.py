@@ -5,6 +5,7 @@
 import os
 import base64
 import json
+from pathlib import Path
 
 from cloud_client.api import RecognizeApi
 from cloud_client.models.audio_file_dto import AudioFileDto
@@ -16,6 +17,8 @@ from cloud_client.models.recognition_request_dto import RecognitionRequestDto
 class CrtClient:
 
     def __init__(self, credentials='conf/crt_api_credentials.json'):
+        p = Path('..') if Path('.').resolve().stem == 'bin' else Path('.')
+        credentials = list(p.glob(credentials))[0].resolve(strict=True)
         self.credentials = json.load(open(credentials, 'rb'))
         self.recognize_api = RecognizeApi()
         self.credentials = StartSessionRequest(self.credentials['username'],
