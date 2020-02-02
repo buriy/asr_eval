@@ -72,10 +72,10 @@ def is_need_again(file_name):
 
 def work_for_each(args):
     """ work in each process """
-    name_api, file, suffix = args
+    name_api, name_file, suffix = args
     client = create_client(name_api)
-    result = client.submit(file)
-    record_result_recognize(result, Path(file).with_suffix(suffix))
+    result = client.submit(name_file)
+    record_result_recognize(result, Path(name_file).with_suffix(suffix))
 
 
 def work_with_dataset_multi(name_api, dir_dataset):

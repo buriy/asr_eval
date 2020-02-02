@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import os
 import json
+from pathlib import Path
 
 from utils.cloud.tinkoff.audio import audio_open_read
 from utils.cloud.tinkoff.auth import authorization_metadata
@@ -13,9 +14,12 @@ from utils.cloud.tinkoff.common import build_recognition_request, make_channel, 
 class TinkoffClient:
 
     def __init__(self, credentials='conf/tinkoff_api_credentials.json'):
-        self.credentials = json.load(open('../../../'+credentials, 'rb'))
+        ind = 0 if Path('.').resolve().stem == 'bin' else 2
+        credentials = sorted(Path('.').resolve().parents[ind].rglob(credentials))[0]
+        self.credentials = json.load(open(credentials, 'rb'))
         os.environ['VOICEKIT_SECRET_KEY'] = self.credentials['secret_key']
         os.environ['VOICEKIT_API_KEY'] = self.credentials['api_key']
+        self.args_input = ['-r', '16000', '-c', '1', '-e', 'LINEAR16']
         # FIXME: set other attributes needed at submit()
         # FIXME: they are set up at BaseRecognitionParser
         # self.encoding = stt_pb2.LINEAR16
@@ -52,9 +56,7 @@ class TinkoffClient:
         # config.enable_automatic_punctuation = not args.disable_automatic_punctuation
 
     def submit(self, file_name):
-        file_name = '../../../' + file_name
-        ars = ['-r', '16000', '-c', '1', '-e', 'LINEAR16', file_name]
-        args = BaseRecognitionParser().parse_args(ars)
+        args = BaseRecognitionParser().parse_args([*self.args_input, file_name])
         if args.encoding == stt_pb2.RAW_OPUS:
             raise ValueError("RAW_OPUS encoding is not supported by this script")
         with audio_open_read(file_name, args.encoding, args.rate, args.num_channels, args.chunk_size,
@@ -72,6 +74,6 @@ class TinkoffClient:
 
 
 if __name__ == "__main__":
-    client = TinkoffClient() #credentials='conf/tinkoff_api_credentials.json')
+    client = TinkoffClient()
     print(client.submit('data/examples/example_16000.wav'))
 

@@ -17,8 +17,10 @@ from cloud_client.models.recognition_request_dto import RecognitionRequestDto
 class CrtClient:
 
     def __init__(self, credentials='conf/crt_api_credentials.json'):
-        p = Path('..') if Path('.').resolve().stem == 'bin' else Path('.')
-        credentials = list(p.glob(credentials))[0].resolve(strict=True)
+        # p = Path('..') if Path('.').resolve().stem == 'bin' else Path('.')
+        # credentials = list(p.glob(credentials))[0].resolve()
+        ind = 0 if Path('.').resolve().stem == 'bin' else 1
+        credentials = sorted(Path('.').resolve().parents[ind].rglob(credentials))[0]
         self.credentials = json.load(open(credentials, 'rb'))
         self.recognize_api = RecognizeApi()
         self.credentials = StartSessionRequest(self.credentials['username'],
