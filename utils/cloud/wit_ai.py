@@ -12,7 +12,7 @@ class WitClient:
             try:
                 resp = self.client.speech(f, None, {'Content-Type': 'audio/wav'})
                 #print(repr(resp))
-                return str(resp['_text'])
+                return str(resp['_text']) or '-'
             except Exception:
                 traceback.print_exc()
                 return ''

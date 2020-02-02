@@ -33,7 +33,7 @@ class YandexClient:
 
             if decodedData.get("error_code") is None:
                 result = decodedData.get("result")
-                return result
+                return result or '-'
         except urllib.error.HTTPError:
             print("Didn't work for:", f_wav)
             import traceback; traceback.print_exc()
