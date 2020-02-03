@@ -37,9 +37,9 @@ class GoogleClient:
             # print(response)
             result = response.results
             if len(result) == 0:
-                return ''
+                return '-'
             if len(result[0].alternatives) == 0:
-                return ''
+                return '-'
             return result[0].alternatives[0].transcript
         except Exception:
             print("Didn't work for:", file_name)
