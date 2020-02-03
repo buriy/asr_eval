@@ -14,8 +14,6 @@ from utils.cloud.tinkoff.common import build_recognition_request, make_channel, 
 class TinkoffClient:
 
     def __init__(self, credentials='conf/tinkoff_api_credentials.json'):
-        ind = 0 if Path('.').resolve().stem == 'bin' else 2
-        credentials = sorted(Path('.').resolve().parents[ind].rglob(credentials))[0]
         self.credentials = json.load(open(credentials, 'rb'))
         os.environ['VOICEKIT_SECRET_KEY'] = self.credentials['secret_key']
         os.environ['VOICEKIT_API_KEY'] = self.credentials['api_key']

@@ -4,29 +4,27 @@ import sys
 from pathlib import Path
 from multiprocessing import Pool
 
-
-def find_dataset(dir):
-    p = Path('..')
-    return list(p.glob(dir))[0].resolve()
+CONF = '../conf/'
+DATA = '../'
 
 
 def create_client(name_api):
     name_api = name_api.lower()
     if name_api == 'crt':
         from utils.cloud.crt_api import CrtClient
-        client = CrtClient()
+        client = CrtClient(credentials=CONF+'crt_api_credentials.json')
     elif name_api == 'tinkoff':
         from utils.cloud.tinkoff.tinkoff_api import TinkoffClient
-        client = TinkoffClient()
+        client = TinkoffClient(credentials=CONF+'tinkoff_api_credentials.json')
     elif name_api == 'google':
         from utils.cloud.google_api import GoogleClient
-        client = GoogleClient()
+        client = GoogleClient(credentials=CONF+'google_api_credentials.json')
     elif name_api == 'wit':
         from utils.cloud.wit_ai import WitClient
-        client = WitClient()
+        client = WitClient(credentials=CONF+'wit_api_credentials.json')
     elif name_api == 'yandex':
         from utils.cloud.yandex_short import YandexClient
-        client = YandexClient()
+        client = YandexClient(credentials=CONF+'yandex_api_credentials.json')
     else:
         client = False
     return client
@@ -80,7 +78,7 @@ def work_for_each(args):
 
 def work_with_dataset_multi(name_api, dir_dataset):
     """ working with files in mode multiprocessing"""
-    abs_dir_dataset = find_dataset(dir_dataset)
+    abs_dir_dataset = DATA + dir_dataset
     assert os.path.exists(abs_dir_dataset)
     client = create_client(name_api)                 # check is exists client for  name_api
     if not client:

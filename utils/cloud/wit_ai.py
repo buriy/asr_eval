@@ -6,10 +6,9 @@ from wit import Wit
 
 
 class WitClient:
+
     def __init__(self, credentials='conf/wit_api_credentials.json'):
-        ind = 0 if Path('.').resolve().stem == 'bin' else 1
-        credentials = sorted(Path('.').resolve().parents[ind].rglob(credentials))[0]
-        self.credentials = json.load(open(credentials, 'r'))
+        self.credentials = json.load(open(credentials, 'rb'))
         self.client = Wit(self.credentials['secret'])
 
     def submit(self, file_name):
