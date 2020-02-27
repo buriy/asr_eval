@@ -63,7 +63,7 @@ class TinkoffClient:
                 stub = stt_pb2_grpc.SpeechToTextStub(make_channel(args))
                 metadata = authorization_metadata(args.api_key, args.secret_key, "tinkoff.cloud.stt")
                 response = stub.Recognize(build_recognition_request(args, reader), metadata=metadata)
-                return print_recognition_response(response) or '-'
+                return response or '-'
             except Exception:
                 print("Didn't work for:", file_name)
                 import traceback;
