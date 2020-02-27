@@ -2,6 +2,8 @@
 import os
 import json
 from pathlib import Path
+from google.protobuf.json_format import MessageToDict
+
 
 from utils.cloud.tinkoff.audio import audio_open_read
 from utils.cloud.tinkoff.auth import authorization_metadata
@@ -63,12 +65,27 @@ class TinkoffClient:
                 stub = stt_pb2_grpc.SpeechToTextStub(make_channel(args))
                 metadata = authorization_metadata(args.api_key, args.secret_key, "tinkoff.cloud.stt")
                 response = stub.Recognize(build_recognition_request(args, reader), metadata=metadata)
-                return response or '-'
+                response = MessageToDict(response,
+                                         including_default_value_fields=True,
+                                         preserving_proto_field_name=True)
+                text = self.extract_text_from_response(response)
+                return text or '-'
             except Exception:
                 print("Didn't work for:", file_name)
                 import traceback;
                 traceback.print_exc()
                 return ''
+
+    def extract_text_from_response(self, response):
+        text = ''
+        if not 'results' in response:
+            return text
+        for item in response['results']:
+            if 'alternatives' in item and 'transcript' in item['alternatives'][0]:
+                text += ' ' + item['alternatives'][0]['transcript']
+            else:
+                break
+        return text
 
 
 if __name__ == "__main__":
